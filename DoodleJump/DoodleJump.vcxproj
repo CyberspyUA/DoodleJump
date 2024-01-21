@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(CoreLibraryDependencies);$(ProjectDir)Framework</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +132,7 @@ xcopy /y /d "$(ProjectDir)Framework\zlib1.dll" "$(OutDir)"
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(CoreLibraryDependencies);$(ProjectDir)Framework</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,27 +153,7 @@ xcopy /y /d "$(ProjectDir)Framework\zlib1.dll" "$(OutDir)"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FrameworkExtended\FrameworkRemake.cpp" />
-    <ClCompile Include="GameSystem.cpp" />
-    <ClCompile Include="source\PlatformManager.cpp" />
-    <ClCompile Include="source\Platforms\RegularPlatform.cpp" />
     <ClCompile Include="DoodleJump.cpp" />
-    <ClCompile Include="source\Entity.cpp" />
-    <ClCompile Include="source\Items\Spring.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="FrameworkExtended\FrameworkRemake.h" />
-    <ClInclude Include="GameSystem.h" />
-    <ClInclude Include="source\GameUtilities\CollisionCalculator.h" />
-    <ClInclude Include="source\Items\Item.h" />
-    <ClInclude Include="source\GameConstantParameters.h" />
-    <ClInclude Include="source\GameUtilities\Point.h" />
-    <ClInclude Include="source\GameUtilities\Rechtangle.h" />
-    <ClInclude Include="source\PlatformManager.h" />
-    <ClInclude Include="source\Platforms\Platform.h" />
-    <ClInclude Include="source\Platforms\RegularPlatform.h" />
-    <ClInclude Include="source\Entity.h" />
-    <ClInclude Include="source\Items\Spring.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
