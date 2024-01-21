@@ -155,6 +155,15 @@ xcopy /y /d "$(ProjectDir)Framework\zlib1.dll" "$(OutDir)"
   <ItemGroup>
     <ClCompile Include="DoodleJump.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Bullet\Bullet.h" />
+    <ClInclude Include="source\Enemy\Enemy.h" />
+    <ClInclude Include="source\GameUtilities\Gameplay.h" />
+    <ClInclude Include="source\GameUtilities\UI.h" />
+    <ClInclude Include="source\Items\Coin.h" />
+    <ClInclude Include="source\Items\Spring.h" />
+    <ClInclude Include="source\Platforms\TempPlat.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
