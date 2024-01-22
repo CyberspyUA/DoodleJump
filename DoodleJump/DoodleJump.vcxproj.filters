@@ -26,9 +26,6 @@
     <ClInclude Include="source\Enemy\Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Items\Spring.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Items\Coin.h">
       <Filter>Header Files</Filter>
     </ClInclude>

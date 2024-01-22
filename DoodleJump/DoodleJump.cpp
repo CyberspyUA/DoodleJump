@@ -13,7 +13,6 @@
  */
 #include "source/Bullet/Bullet.h"
 #include "source/Enemy/Enemy.h"
-#include "source/Items/Spring.h"
 #include "source/Items/Coin.h"
 #include "source/Platforms/TempPlat.h"
 /**
@@ -84,7 +83,6 @@ private:
 	/**
 	 * Items sprites
 	 */
-	Sprite *jumpSpring = nullptr;
     Sprite *coin = nullptr;
 	/**
 	 * Player numeric variables
@@ -101,7 +99,7 @@ private:
     float deltaY = 0, gravity = 500;
     float lastTick;
     float deltaTime;
-	float springJumpHeight;
+	float jumpHeight;
     float startSpring;
     float stopSpring;
     float startImmune;
@@ -141,13 +139,12 @@ private:
     /**
      * Items numeric variables
      */
-    int wSpring, hSpring,  wCoin = 15, hCoin = 15;
+    int wCoin = 15, hCoin = 15;
 	/**
 	 * Structure variables
 	 */
 	std::vector<Bullet> bullets;
     std::vector<Enemy> enemies;
-    std::vector<Spring> springs;
     std::vector<TempPlat> tmplats;
     std::vector<Coin> coins;
 
@@ -203,7 +200,6 @@ public:
         //Background
         background = createSprite("data/Background/space-bck@2x.png");
         //Items
-        jumpSpring = createSprite("data/Items/springIdle.png");
         coin = createSprite("data/Items/coin.png");
         //Enemy
         enemy = createSprite("data/Enemies/RadarMonster.png");
@@ -217,7 +213,6 @@ public:
         getSpriteSize(enemy, wEnemy, hEnemy);
         getSpriteSize(bulletspr, wBullet, hBullet);
         getSpriteSize(digits[9], wDigit, hDigit);
-        getSpriteSize(jumpSpring, wSpring, hSpring);
         getSpriteSize(playStart, wPlayStart, hPlayStart);
         getSpriteSize(coin, wCoin, hCoin);
         int platformCount = 9;
@@ -226,7 +221,7 @@ public:
         deltaTime = 0;
         lastTick = getTickCount();
         lifes = 3;
-        springJumpHeight = 1;
+        jumpHeight = 1;
         return true;
     }
 
@@ -279,13 +274,6 @@ public:
                 }
                 RenderEnemies(enemies, enemy);
                 /**
-                 * Rendering springs
-                 */
-                for (int i = 0; i < springs.size(); i++)
-                {
-                    drawSprite(jumpSpring, springs[i].x, springs[i].y);
-                }
-                /**
                  * Rendering temporary platforms
                  */
                 for (int i = 0; i < tmplats.size(); i++)
@@ -305,7 +293,7 @@ public:
                 {
                     if ((floor(playery + hPlayer) == a[i][1] + 3 || floor(playery + hPlayer) == a[i][1] + 1 || floor(playery + hPlayer) == a[i][1] + 2 || floor(playery + hPlayer) == a[i][1] + 5 || floor(playery + hPlayer) == a[i][1] + 4 || floor(playery + hPlayer) == a[i][1] + 6) && floor(playerx) >= a[i][0] - wPlayer + 25 && floor(playerx) <= a[i][0] + wPlatform - 20 && deltaY > 0)
                     {
-                        deltaY = -(800) * springJumpHeight;
+                        deltaY = -(800) * jumpHeight;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
@@ -318,7 +306,7 @@ public:
                 {
                     if ((floor(playery + hPlayer) == tmplats[i].y + 3 || floor(playery + hPlayer) == tmplats[i].y + 1 || floor(playery + hPlayer) == tmplats[i].y + 2 || floor(playery + hPlayer) == tmplats[i].y + 5 || floor(playery + hPlayer) == tmplats[i].y + 4 || floor(playery + hPlayer) == tmplats[i].y + 6) && floor(playerx) >= tmplats[i].x - wPlayer + 25 && floor(playerx) <= tmplats[i].x + wPlatform - 20 && deltaY > 0)
                     {
-                        deltaY = -(800) * springJumpHeight;
+                        deltaY = -(800) * jumpHeight;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
@@ -352,20 +340,6 @@ public:
                     }
                 }
 
-                /**
-                 *  Spring ability last for 1 seconds, after that spring is set to 1,
-                 *  the jump speed being multiplied by spring it will come back to normal after setting it to 1
-                 *  and it will speed up when the spring boots is on.
-                 */
-                if (springed == true)
-                {
-                    if ((getTickCount() - startSpring) / 1000 > 1)
-                    {
-                        springed = false;
-                        springJumpHeight = 1;
-                        stopSpring = getTickCount();
-                    }
-                }
                 /**
                  * Immune ability for 20 seconds.
                  * It lasts for 20 seconds.
@@ -412,13 +386,6 @@ public:
                             for (int j = 0; j < enemies.size(); j++)
                                 if (enemies[j].platformID == i)
                                     enemies.erase(enemies.begin() + j);
-                            /**
-                             * Erase the spring from the platform that got off the screen.
-                             */
-                            for (int j = 0; j < springs.size(); j++)
-                                if (springs[j].platformID == i)
-                                    springs.erase(springs.begin() + j);
-                            
 
                             score += 1;
                             a[i][1] = 0;
@@ -447,17 +414,7 @@ public:
                                 Enemy newEnemy = {a[i][0] + wPlatform / 2 - wEnemy / 2, a[i][1] - hEnemy, i};
                                 enemies.push_back(newEnemy);
                             }
-                            
-                            if ((getTickCount() - startSpring) / 1000 > 1 && (getTickCount() - stopSpring) / 1000 > 1)
-                            {
-                                int randomSpring = rand() % 999;
-                                // 1% of time spring will be created
-                                if (randomSpring < 60 && random > 60)
-                                {
-                                    Spring newSpring = {a[i][0] + wPlatform / 2 - wSpring / 2, a[i][1] - hSpring, i};
-                                    springs.push_back(newSpring);
-                                }
-                            }
+
                             
                         }
 
@@ -466,11 +423,6 @@ public:
                          */
                         for (int j = 0; j < enemies.size(); j++)
                             enemies[j].y = a[enemies[j].platformID][1] - hEnemy;
-                        /**
-                         * Spring moves down with the platform it belongs to
-                         */
-                        for (int j = 0; j < springs.size(); j++)
-                            springs[j].y = a[springs[j].platformID][1] - hSpring;
                         
                     }
                      /**
@@ -486,9 +438,7 @@ public:
 
                 playerInteractWithEnemy(enemies, playerx, playery, wPlayer, hPlayer, wEnemy, hEnemy, deltaY, play);
 
-                playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, springJumpHeight, startSpring);
-
-                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, springJumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
+                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, jumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
 
                 playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score, coinScore);
                 /**
@@ -645,7 +595,6 @@ public:
             playery = Height / 2;
             bullets.clear();
             enemies.clear();
-            springs.clear();
             tmplats.clear();
             deltaY = 0;
             gravity = 500;
@@ -656,8 +605,7 @@ public:
             const float gap = (float)(Height / platformCount);
             generatePlatforms(a, gap, Width, Height, wPlatform);
             lifes = 3;
-            springJumpHeight = 1;
-            springed = false;
+            jumpHeight = 1;
             /**
              *Restart immune ability
              */

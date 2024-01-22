@@ -59,23 +59,6 @@ inline void playerInteractWithEnemy(std::vector<Enemy> &enemies, float playerx, 
     }
 }
 
-inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx, float playery, int wPlayer, int hPlayer, int wSpring, int hSpring, float dy, bool &springed, float &spring, float &startSpring)
-{
-    for (int i = 0; i < springs.size(); i++)
-    {
-        if (floor(playerx) >= springs[i].x - wPlayer && floor(playerx) <= springs[i].x + wSpring)
-        {
-            if ((floor(playery + hPlayer) == springs[i].y + 3 || floor(playery + hPlayer) == springs[i].y + 1 || floor(playery + hPlayer) == springs[i].y + 2 || floor(playery + hPlayer) == springs[i].y + 5 || floor(playery + hPlayer) == springs[i].y + 4 || floor(playery + hPlayer) == springs[i].y + 6) && dy > 0)
-            {
-                springs.erase(springs.begin() + i);
-                springed = true;
-                spring = 1.5;
-                startSpring = getTickCount();
-            }
-        }
-    }
-}
-
 inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinScore) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive &&
