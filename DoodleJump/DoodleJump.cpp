@@ -377,10 +377,7 @@ public:
                     {
                         
                         stopImmune = getTickCount();
-                    }
-                    else
-                    {
-	                    destroySprite(lookLeft);
+                        destroySprite(lookLeft);
 			            destroySprite(lookRight);
 			            destroySprite(lookUp);
                         lookRight = createSprite("data/Player/space-right.png");
@@ -677,6 +674,7 @@ public:
         }
         if(button == FRMouseButton::RIGHT && coinScore >= 20)
         {
+            startImmune = getTickCount();
             destroySprite(lookLeft);
             destroySprite(lookRight);
             destroySprite(lookUp);

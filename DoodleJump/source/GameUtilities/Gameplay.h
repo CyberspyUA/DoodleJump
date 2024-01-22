@@ -27,9 +27,9 @@ inline void generatePlatforms(int a[][2], float gap, int Width, int Height, int 
  * \brief Destroying the enemy when bullet hit the enemy
  * \param bullets 
  * \param enemies 
- * \param wEnemy 
- * \param hEnemy 
- * \param wBullet 
+ * \param wEnemy - enemy width
+ * \param hEnemy - enemy height
+ * \param wBullet - bullet width
  */
 inline void bulletDestroysEnemy(std::vector<Bullet> &bullets, std::vector<Enemy> &enemies, int wEnemy, int hEnemy, int wBullet)
 {
@@ -84,10 +84,10 @@ inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx
 inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinScore) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive &&
-            playerx + wPlayer > coins[i].x &&
-            playerx < coins[i].x &&
-            playery + hPlayer > coins[i].y &&
-            playery < coins[i].y) {
+            playerx + wPlayer >= coins[i].x &&
+            playerx <= coins[i].x &&
+            playery + hPlayer >= coins[i].y &&
+            playery <= coins[i].y) {
             // Player collected the coin
             coins[i].isActive = false;
             score += 100;
