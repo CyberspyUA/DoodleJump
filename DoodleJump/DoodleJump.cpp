@@ -48,6 +48,7 @@ private:
     bool isMovingRight = false;
     bool isMovingLeft = false;
     bool playerHitTempPlatform = false;
+    bool isImmuneToFall = false;
 	/**
 	 * Player sprites
 	 */
@@ -99,15 +100,15 @@ private:
     float deltaY = 0, gravity = 500;
     float lastTick;
     float deltaTime;
+	float springJumpHeight;
+    float startSpring;
+    float stopSpring;
     int a[8][2];
 
 	/**
 	 * UI numeric variables 
 	 */
 	float gap;
-    float spring;
-    float startSpring;
-    float stopSpring;
     int Width, Height; // Screen Width and Height
     int score = 0;
     int scorepx = 0;
@@ -115,11 +116,13 @@ private:
     int aux, scoreCounter = 0, heightCounter = 0;
     int wDigit, hDigit;
     int  wButtonAgain, hButtonAgain;
+    static int totalCoinCounter;
     /**
      * Platform numeric variables
      */
     int wPlatform, hPlatform;
     int indTempPlatform;
+    int indPlatformForCoinToRender;
     /**
      * Enemy numeric variables
      */
@@ -210,17 +213,19 @@ public:
         getSpriteSize(coin, wCoin, hCoin);
         int platformCount = 9;
         gap = (float)(Height / platformCount);
-        generatePlatforms(a, gap, Width, Height, wPlatform,  hPlatform, coins);
+        generatePlatforms(a, gap, Width, Height, wPlatform);
         deltaTime = 0;
         lastTick = getTickCount();
         lifes = 3;
-        spring = 1;
+        springJumpHeight = 1;
         return true;
     }
 
     virtual void Close()
     {
     }
+
+	
 
     virtual bool Tick()
     {
@@ -262,13 +267,7 @@ public:
                 {
                     drawSprite(digits[secondDigit[i]], Width - i * 25 - (wDigit + wDigit / 2), 7);
                 }
-                /**
-                 * Rendering enemies
-                 */
-                for (int i = 0; i < enemies.size(); i++)
-                {
-                    drawSprite(enemy, enemies[i].x, enemies[i].y);
-                }
+                RenderEnemies(enemies, enemy);
                 /**
                  * Rendering springs
                  */
@@ -277,7 +276,7 @@ public:
                     drawSprite(jumpSpring, springs[i].x, springs[i].y);
                 }
                 /**
-                 * Rendering platforms
+                 * Rendering temporary platforms
                  */
                 for (int i = 0; i < tmplats.size(); i++)
                 {
@@ -286,7 +285,7 @@ public:
                 /**
                  * Rendering coins
                  */
-                renderCoins(coins, coin);
+                renderCoins(coins, coin, wPlatform, hPlatform);
                 /**
                  * Hitting the platform gameplay mechanic.
                  * Player jumps off a platform, and the score is increased
@@ -296,7 +295,7 @@ public:
                 {
                     if ((floor(playery + hPlayer) == a[i][1] + 3 || floor(playery + hPlayer) == a[i][1] + 1 || floor(playery + hPlayer) == a[i][1] + 2 || floor(playery + hPlayer) == a[i][1] + 5 || floor(playery + hPlayer) == a[i][1] + 4 || floor(playery + hPlayer) == a[i][1] + 6) && floor(playerx) >= a[i][0] - wPlayer + 25 && floor(playerx) <= a[i][0] + wPlatform - 20 && deltaY > 0)
                     {
-                        deltaY = -(800) * spring;
+                        deltaY = -(800) * springJumpHeight;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
@@ -309,7 +308,7 @@ public:
                 {
                     if ((floor(playery + hPlayer) == tmplats[i].y + 3 || floor(playery + hPlayer) == tmplats[i].y + 1 || floor(playery + hPlayer) == tmplats[i].y + 2 || floor(playery + hPlayer) == tmplats[i].y + 5 || floor(playery + hPlayer) == tmplats[i].y + 4 || floor(playery + hPlayer) == tmplats[i].y + 6) && floor(playerx) >= tmplats[i].x - wPlayer + 25 && floor(playerx) <= tmplats[i].x + wPlatform - 20 && deltaY > 0)
                     {
-                        deltaY = -(800) * spring;
+                        deltaY = -(800) * springJumpHeight;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
@@ -353,7 +352,7 @@ public:
                     if ((getTickCount() - startSpring) / 1000 > 1)
                     {
                         springed = false;
-                        spring = 1;
+                        springJumpHeight = 1;
                         stopSpring = getTickCount();
                     }
                 }
@@ -397,11 +396,12 @@ public:
                             else
                                 a[i][0] = rand() % (Width / 2 - wPlatform) + Width / 2;
 
-                            /**
-                             *  Second Task
-                             *  A platform that allows you to jump using it only once, after which it gets destroyed.
-                             *
-                             */
+                            int randCoin = rand() % 100;
+					        // 5% chance of generating a coin on the platform
+					        if (randCoin < 50) {
+					            Coin newCoin = { a[i][0] + wPlatform / 2, a[i][1] - hPlatform, i, true };
+					            coins.push_back(newCoin);
+					        }
                             int randPlatTemp = rand() % 999;
                             // 10% of time a platform will be created
                             if (randPlatTemp < 100)
@@ -427,9 +427,9 @@ public:
                                     springs.push_back(newSpring);
                                 }
                             }
-                            updateCoinPositions(coins, deltaY);
+                            
                         }
-
+                        /*updateCoinPositions(coins, deltaY);*/
                         /**
                          * Enemy moves down with the platform it belongs to
                          */
@@ -451,22 +451,21 @@ public:
 
                 renderBullets(bullets, deltaTime, bulletspr);
 
-                renderCoins(coins, coin);
-
                 bulletDestroysEnemy(bullets, enemies, wEnemy, hEnemy, wBullet);
 
                 playerInteractWithEnemy(enemies, playerx, playery, wPlayer, hPlayer, wEnemy, hEnemy, deltaY, play);
 
-                playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, spring, startSpring);
+                playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, springJumpHeight, startSpring);
 
-                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform, wPlatform, hPlatform);
-               
+                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, springJumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
 
-                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer);
+                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score);
+
+                updateCoinPositions(coins, deltaY, deltaTime);
                 /**
                  * Remove temporary if:
-                 *  1) Platforms out of the screen;
-                 *  2) Player jumped on the temporary platform, so it can be deleted.
+                 *  1) Player jumped on the temporary platform, so it can be deleted.
+                 *  2) Platforms out of the screen;
                  */
                 std::vector<int> indicesToRemove;
 
@@ -475,7 +474,6 @@ public:
 				    if(playerHitTempPlatform && tmplats[i].isPlatformUsed)
 				    {
 				        indicesToRemove.push_back(i);
-				        std::cout << "Platform erased." << std::endl;
                         playerHitTempPlatform = false;
 				    }
 				    if (tmplats[i].y > Height)
@@ -620,9 +618,9 @@ public:
             scorepx = 0;
             int platformCount = 9;
             const float gap = (float)(Height / platformCount);
-            generatePlatforms(a, gap, Width, Height, wPlatform, hPlatform, coins);
+            generatePlatforms(a, gap, Width, Height, wPlatform);
             lifes = 3;
-            spring = 1;
+            springJumpHeight = 1;
             springed = false;
         }
         // Shoot projectile
