@@ -2,6 +2,6 @@
 struct Coin
 {
 	int x,y;
-    int plt;
+    int platformID;
     bool isActive; // To check if the coin is active or collected
 };

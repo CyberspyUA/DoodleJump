@@ -2,5 +2,5 @@
 struct Spring
 {
     int x, y;
-    int plt;
+    int platformID;
 };

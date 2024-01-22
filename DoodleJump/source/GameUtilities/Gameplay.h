@@ -30,8 +30,8 @@ void renderBullets(std::vector<Bullet> &bullets, float dt, Sprite *bulletspr)
         if (bullet.isActive)
         {
             float angle = atan2(bullet.y, bullet.x - bullet.mouseX);
-            bullet.y += bullet.dy * dt * sin(angle);
-            bullet.x += bullet.dx * dt * cos(angle);
+            bullet.y += bullet.deltaY * dt * sin(angle);
+            bullet.x += bullet.deltaX * dt * cos(angle);
             drawSprite(bulletspr, bullet.x, bullet.y);
             if (bullet.y < 0)
             {
@@ -105,7 +105,24 @@ void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playe
         }
     }
 }
-
+void playerInteractWithTempPlat(std::vector<TempPlat>& tmplats, float playerx, float playery, int wPlayer, int hPlayer, float& dy, float spring, bool& didPlayerHitPlatform, int& indHitPlatform)
+{
+    for (int i = 0; i < tmplats.size(); i++)
+    {
+        if (tmplats[i].isPlatformUsed && playerx + wPlayer > tmplats[i].x &&
+            playerx < tmplats[i].x &&
+            playery + hPlayer > tmplats[i].y &&
+            playery < tmplats[i].y)
+        {
+            didPlayerHitPlatform = true;
+            // Jump off the temporary platform
+            dy = -(800) * spring;
+            // Set the temporary platform as used
+            tmplats[i].isPlatformUsed = true;
+            indHitPlatform = i;
+        }
+    }
+}
 void renderCoins(std::vector<Coin>& coins, Sprite* coinSprite) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive) {

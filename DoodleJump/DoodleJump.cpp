@@ -3,11 +3,10 @@
  */
 #include "Framework.h"
 /*
- * C++ Standart library
+ * C++ Standard library
  */
 #include <iostream>
 #include <cmath>
-#include <ctime>
 #include <vector>
 /**
  * Game elements
@@ -32,69 +31,135 @@ class ExtendedFramework : public Framework
 {
 
 private:
-    bool started = false;
+	/**
+	 * Game stages bool variables
+	 */
+	bool started = false;
     bool play = true;
-    bool facingRight = true;
+    bool goodForAgain = false;
+    bool goodForStartGame = false;
+	/**
+	 * Player bool variables
+	 */
+	bool facingRight = true;
     bool facingLeft = false;
     bool facingUp = false;
     bool springed = false;
     bool isMovingRight = false;
     bool isMovingLeft = false;
-    bool goodForAgain = false;
-    bool goodForStartGame = false;
-    Sprite *lookRight = nullptr;
+    bool playerHitTempPlatform = false;
+	/**
+	 * Player sprites
+	 */
+	Sprite *lookRight = nullptr;
     Sprite *lookLeft = nullptr;
     Sprite *lookUp = nullptr;
-    Sprite *background = nullptr;
-    Sprite *block = nullptr;
+    Sprite *nose = nullptr;
+	/**
+	 * Platforms sprites
+	 */
+	Sprite *block = nullptr;
+    Sprite *platformTemp = nullptr;
+	/**
+	 * UI sprites
+	 */
+	Sprite *background = nullptr;
+    Sprite *playStart = nullptr;
     Sprite *backgroundlost = nullptr;
     Sprite *playagain = nullptr;
     Sprite *digits[10];
-    Sprite *bulletspr = nullptr;
-    Sprite *nose = nullptr;
-    Sprite *enemy = nullptr;
     Sprite *topscore = nullptr;
     Sprite *scoreWord = nullptr;
-    Sprite *jumpspring = nullptr;
-    Sprite *platformTemp = nullptr;
-    Sprite *playStart = nullptr;
+	/**
+	 * Bullet sprite
+	 */
+	Sprite *bulletspr = nullptr;
+	/**
+	 * Enemy sprite
+	 */
+	Sprite *enemy = nullptr;
+
+	/**
+	 * Items sprites
+	 */
+	Sprite *jumpspring = nullptr;
     Sprite *coin = nullptr;
-    float playerx;
+	/**
+	 * Player numeric variables
+	 */
+	float playerx;
     float playery;
     float mousex, mousey;
-    float dy = 0, grav = 500;
-    float gap;
-    int wPlatform, hPlatform, hPlayer, wPlayer, wButtonAgain, hButtonAgain;
-    int a[8][2];
-    int Width, Height;
-    float dt;
-    float spring;
+    int  hPlayer, wPlayer;
+    int lifes = 3;
+    int wPlayStart, hPlayStart;
+    /**
+     *Engine numeric variables
+     */
+    float deltaY = 0, gravity = 500;
     float lastTick;
+    float deltaTime;
+    int a[8][2];
+
+	/**
+	 * UI numeric variables 
+	 */
+	float gap;
+    float spring;
     float startSpring;
     float stopSpring;
+    int Width, Height; // Screen Width and Height
     int score = 0;
     int scorepx = 0;
     int firstDigit[20], secondDigit[20];
-    int aux, firstCounter = 0, secondCounter = 0;
-    int lifes = 3;
-    int wEnemy, hEnemy, wBullet, hBullet, wDigit, hDigit, wSpring, hSpring, wPlayStart, hPlayStart, wCoin = 15, hCoin = 15;
-    std::vector<Bullet> bullets;
+    int aux, scoreCounter = 0, heightCounter = 0;
+    int wDigit, hDigit;
+    int  wButtonAgain, hButtonAgain;
+    /**
+     * Platform numeric variables
+     */
+    int wPlatform, hPlatform;
+    int indTempPlatform;
+    /**
+     * Enemy numeric variables
+     */
+    int wEnemy, hEnemy;
+    /**
+     * Bullet numeric variables
+     */
+    int  wBullet, hBullet;
+    /**
+     * Items numeric variables
+     */
+    int wSpring, hSpring,  wCoin = 15, hCoin = 15;
+	/**
+	 * Structure variables
+	 */
+	std::vector<Bullet> bullets;
     std::vector<Enemy> enemies;
     std::vector<Spring> springs;
     std::vector<TempPlat> tmplats;
     std::vector<Coin> coins;
 
 public:
-    virtual void PreInit(int &width, int &height, bool &fullscreen)
+	/**
+	 * \Preinitializing parameters and settings before running the framework.
+	 * \param width - Window width
+	 * \param height - Window height
+	 * \param fullscreen - enable fullscreen mode?
+	 */
+	void PreInit(int &width, int &height, bool &fullscreen) override
     {
-
+        std::cout << "Enter window width and height: (use space to split values)\n";
+        std::cin >> width;
+        std::cin >> height;
         fullscreen = false;
     }
 
     virtual bool Init()
     {
         /**
-         * Preinitializing parameters
+         * Initializing parameters
          */
         //Screen
         getScreenSize(Width, Height);
@@ -128,7 +193,7 @@ public:
         //Items
         jumpspring = createSprite("data/Items/springIdle.png");
         coin = createSprite("data/Items/coin.png");
-        //Enemies
+        //Enemy
         enemy = createSprite("data/Enemies/RadarMonster.png");
         playStart = createSprite("data/UI/play.png");
         setSpriteSize(background, Width, Height);
@@ -146,7 +211,7 @@ public:
         int platformCount = 9;
         gap = (float)(Height / platformCount);
         generatePlatforms(a, gap, Width, Height, wPlatform,  hPlatform, coins);
-        dt = 0;
+        deltaTime = 0;
         lastTick = getTickCount();
         lifes = 3;
         spring = 1;
@@ -159,13 +224,22 @@ public:
 
     virtual bool Tick()
     {
+        /**
+         * If player started the game
+         */
         if (started)
         {
+            /**
+             * If player pressed play button - entering the game.
+             */
             if (play == true)
             {
-                dt = (getTickCount() - lastTick) / 1000.0f;
-                if (dt > 0.015)
-                    dt = 0.015;
+                /**
+                 * Drawing top UI
+                 */
+                deltaTime = (getTickCount() - lastTick) / 1000.0f;
+                if (deltaTime > 0.015)
+                    deltaTime = 0.015;
                 lastTick = getTickCount();
                 drawSprite(background, 0, 0);
                 drawSprite(topscore, 0, 0);
@@ -173,90 +247,104 @@ public:
                 for (int i = 1; i <= 6; i++)
                     drawSprite(block, a[i][0], a[i][1]);
 
-                firstCounter = 0;
-                numberToDigits(score, firstDigit, firstCounter);
+                scoreCounter = 0;
+                numberToDigits(score, firstDigit, scoreCounter);
 
-                for (int i = firstCounter - 1; i >= 0; i--)
+                for (int i = scoreCounter - 1; i >= 0; i--)
                 {
-                    drawSprite(digits[firstDigit[i]], Width / 3 - i * 25, 7);
+                    drawSprite(digits[firstDigit[i]], Width / 5 - i * 25, 7);
                 }
 
-                secondCounter = 0;
-                numberToDigits(scorepx, secondDigit, secondCounter);
+                heightCounter = 0;
+                numberToDigits(scorepx, secondDigit, heightCounter);
 
-                for (int i = secondCounter - 1; i >= 0; i--)
+                for (int i = heightCounter - 1; i >= 0; i--)
                 {
                     drawSprite(digits[secondDigit[i]], Width - i * 25 - (wDigit + wDigit / 2), 7);
                 }
-
+                /**
+                 * Rendering enemies
+                 */
                 for (int i = 0; i < enemies.size(); i++)
                 {
                     drawSprite(enemy, enemies[i].x, enemies[i].y);
                 }
-
+                /**
+                 * Rendering springs
+                 */
                 for (int i = 0; i < springs.size(); i++)
                 {
                     drawSprite(jumpspring, springs[i].x, springs[i].y);
                 }
-
+                /**
+                 * Rendering platforms
+                 */
                 for (int i = 0; i < tmplats.size(); i++)
                 {
                     drawSprite(platformTemp, tmplats[i].x, tmplats[i].y);
                 }
 
-              
-                // hitting the platform
-                // player jumps , and score is increased
+                /**
+                 * Hitting the platform gameplay mechanic.
+                 * Player jumps off a platform, and the score is increased
+                 */
+                
                 for (int i = 1; i <= 6; i++)
                 {
-                    if ((floor(playery + hPlayer) == a[i][1] + 3 || floor(playery + hPlayer) == a[i][1] + 1 || floor(playery + hPlayer) == a[i][1] + 2 || floor(playery + hPlayer) == a[i][1] + 5 || floor(playery + hPlayer) == a[i][1] + 4 || floor(playery + hPlayer) == a[i][1] + 6) && floor(playerx) >= a[i][0] - wPlayer + 25 && floor(playerx) <= a[i][0] + wPlatform - 20 && dy > 0)
+                    if ((floor(playery + hPlayer) == a[i][1] + 3 || floor(playery + hPlayer) == a[i][1] + 1 || floor(playery + hPlayer) == a[i][1] + 2 || floor(playery + hPlayer) == a[i][1] + 5 || floor(playery + hPlayer) == a[i][1] + 4 || floor(playery + hPlayer) == a[i][1] + 6) && floor(playerx) >= a[i][0] - wPlayer + 25 && floor(playerx) <= a[i][0] + wPlatform - 20 && deltaY > 0)
                     {
-                        dy = -(800) * spring;
+                        deltaY = -(800) * spring;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
                 }
-
-                // jump from temporary platforms
+                 /**
+                 * Player jumps off a temporary platform.
+                 */
+                
                 for (int i = 0; i < tmplats.size(); i++)
                 {
-                    if ((floor(playery + hPlayer) == tmplats[i].y + 3 || floor(playery + hPlayer) == tmplats[i].y + 1 || floor(playery + hPlayer) == tmplats[i].y + 2 || floor(playery + hPlayer) == tmplats[i].y + 5 || floor(playery + hPlayer) == tmplats[i].y + 4 || floor(playery + hPlayer) == tmplats[i].y + 6) && floor(playerx) >= tmplats[i].x - wPlayer + 25 && floor(playerx) <= tmplats[i].x + wPlatform - 20 && dy > 0)
+                    if ((floor(playery + hPlayer) == tmplats[i].y + 3 || floor(playery + hPlayer) == tmplats[i].y + 1 || floor(playery + hPlayer) == tmplats[i].y + 2 || floor(playery + hPlayer) == tmplats[i].y + 5 || floor(playery + hPlayer) == tmplats[i].y + 4 || floor(playery + hPlayer) == tmplats[i].y + 6) && floor(playerx) >= tmplats[i].x - wPlayer + 25 && floor(playerx) <= tmplats[i].x + wPlatform - 20 && deltaY > 0)
                     {
-                        dy = -(800) * spring;
+                        deltaY = -(800) * spring;
                         score += 1;
                         scorepx += Height - a[i][1];
                     }
                 }
 
-                dy += grav * dt;
-                playery += dy * dt;
+                deltaY += gravity * deltaTime;
+                playery += deltaY * deltaTime;
 
-                // Calculations for the jumping of the doodle
-                if (dt < 0.002)
+                /**
+                 * Calculations for the doodle.
+                 */
+                if (deltaTime < 0.002)
                 {
-                    if (dy * 0.002 > -0.7 && dy < 0)
+                    if (deltaY * 0.002 > -0.7 && deltaY < 0)
                     {
-                        dy = -dy;
+                        deltaY = -deltaY;
                     }
                 }
-                else if (dt > 0.004)
+                else if (deltaTime > 0.004)
                 {
-                    if (dy * 0.004 > -0.7 && dy < 0)
+                    if (deltaY * 0.004 > -0.7 && deltaY < 0)
                     {
-                        dy = -dy;
+                        deltaY = -deltaY;
                     }
                 }
                 else
                 {
-                    if (dy * dt > -0.7 && dy < 0)
+                    if (deltaY * deltaTime > -0.7 && deltaY < 0)
                     {
-                        dy = -dy;
+                        deltaY = -deltaY;
                     }
                 }
 
-                //  Spring ability last for 1 seconds, after that spring is set to 1,
-                //  the jump speed being multiplied by spring it will come back to normal after setting it to 1
-                //  and it will speed up when the spring boots is on
+                /**
+                 *  Spring ability last for 1 seconds, after that spring is set to 1,
+                 *  the jump speed being multiplied by spring it will come back to normal after setting it to 1
+                 *  and it will speed up when the spring boots is on.
+                 */
                 if (springed == true)
                 {
                     if ((getTickCount() - startSpring) / 1000 > 1)
@@ -267,25 +355,36 @@ public:
                     }
                 }
 
-                // the algorithm for keeping the player at max the center of the screen
-                // and making it seem like he is going up, and platforms down
+                /**
+                 * Game view adjust method.
+                 * Keep the player at max the center of the screen
+                 * and making it seem like he is going up, and platforms down.
+                 */
                 if (playery < Height / 2)
                 {
-                    // keeping player at max the center of the screen
+                    /**
+                     * Keep the player at the max center of the screen
+                     */
                     playery = Height / 2;
                     for (int i = 1; i <= 6; i++)
                     {
-                        // moving the platforms down
-                        a[i][1] -= dy * dt;
+                        /**
+                         * Move the platforms down
+                         */
+                        a[i][1] -= deltaY * deltaTime;
                         if (a[i][1] > Height)
                         {
-                            // erase the enemy from the paltform that got off the screen
+                            /**
+                             * Erase the enemy from the platform that got off the screen.
+                             */
                             for (int j = 0; j < enemies.size(); j++)
-                                if (enemies[j].plt == i)
+                                if (enemies[j].platformID == i)
                                     enemies.erase(enemies.begin() + j);
-                            // erase the spring from the paltform that got off the screen
+                            /**
+                             * Erase the spring from the paltform that got off the screen.
+                             */
                             for (int j = 0; j < springs.size(); j++)
-                                if (springs[j].plt == i)
+                                if (springs[j].platformID == i)
                                     springs.erase(springs.begin() + j);
 
                             score += 1;
@@ -314,7 +413,7 @@ public:
                                 Enemy newEnemy = {a[i][0] + wPlatform / 2 - wEnemy / 2, a[i][1] - hEnemy, i};
                                 enemies.push_back(newEnemy);
                             }
-
+                            renderCoins(coins, coin);
                             if ((getTickCount() - startSpring) / 1000 > 20 && (getTickCount() - stopSpring) / 1000 > 10)
                             {
                                 int randomSpring = rand() % 999;
@@ -325,62 +424,84 @@ public:
                                     springs.push_back(newSpring);
                                 }
                             }
-                            updateCoinPositions(coins, dy);
+                            updateCoinPositions(coins, deltaY);
                         }
-                        // enemy moves down with the platform it belongs to
+
+                        /**
+                         * Enemy moves down with the platform it belongs to
+                         */
                         for (int j = 0; j < enemies.size(); j++)
-                            enemies[j].y = a[enemies[j].plt][1] - hEnemy;
-                        // spring moves down with the platform it belongs to
+                            enemies[j].y = a[enemies[j].platformID][1] - hEnemy;
+                        /**
+                         * Spring moves down with the platform it belongs to
+                         */
                         for (int j = 0; j < springs.size(); j++)
-                            springs[j].y = a[springs[j].plt][1] - hSpring;
+                            springs[j].y = a[springs[j].platformID][1] - hSpring;
                         
                     }
-                     
-                    // temp platforms move down with the platforms
+                     /**
+                      * Temp platforms move down
+                      */
                     for (int i = 0; i < tmplats.size(); i++)
-                        tmplats[i].y -= dy * dt;
+                        tmplats[i].y -= deltaY * deltaTime;
                 }
 
-                renderBullets(bullets, dt, bulletspr);
-                
+                renderBullets(bullets, deltaTime, bulletspr);
+
                 renderCoins(coins, coin);
 
                 bulletDestroysEnemy(bullets, enemies, wEnemy, hEnemy, wBullet);
 
-                playerInteractWithEnemy(enemies, playerx, playery, wPlayer, hPlayer, wEnemy, hEnemy, dy, play);
+                playerInteractWithEnemy(enemies, playerx, playery, wPlayer, hPlayer, wEnemy, hEnemy, deltaY, play);
 
-                playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, dy, springed, spring, startSpring);
+                playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, spring, startSpring);
+
+                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform, indTempPlatform);
+
+                if(playerHitTempPlatform)
+                {
+                	tmplats.erase(std::remove_if(tmplats.begin(), tmplats.end(), [](const TempPlat& plat) { return plat.isPlatformUsed; }), tmplats.end());
+                    playerHitTempPlatform = false;
+                }
 
                 playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer);
-                // remove temp platforms out of the screen
+                /**
+                 * Remove temporary platforms out of the screen
+                 */
                 for (int i = 0; i < tmplats.size(); i++)
                 {
                     if (tmplats[i].y > Height)
                         tmplats.erase(tmplats.begin() + i);
                 }
-
-                // if player is out of the screen then he appears on the other side
+				/**
+				 * In case: player is out of the screen - he appears on the other side.
+				 */
                 if (playerx + wPlayer > Width)
                     playerx = 0;
                 else if (playerx + wPlayer < 0)
                     playerx = Width - wPlayer;
 
-                // left right speed
+               /**
+                * Left-Right moving
+                */
                 if (isMovingRight)
                 {
-                    playerx += 300 * dt;
-                    //First task. The player moves faster by 50% while on the right side.
-                    if( playerx >= 400)
+                    playerx += 300 * deltaTime;
+                    /**
+                     * First major task. The player moves faster by 50% while on the right side.
+                     */
+                    if( playerx >= Width/2.0f)
                     {
-	                    playerx += 600 * dt;
+	                    playerx += 600 * deltaTime;
                     }
                 }
                 if (isMovingLeft)
                 {
-                    playerx -= 300 * dt;
+                    playerx -= 300 * deltaTime;
                 }
-
-                // if shooting then doodle has the nose up
+                /**
+                 * If player is not shooting, draw a sprite where it is facing
+                 */
                 if (!bullets.size())
                 {
                     if (facingRight)
@@ -388,15 +509,18 @@ public:
                     else if (facingLeft)
                         drawSprite(lookLeft, playerx, playery);
                 }
-                // else he looks normal
+                /**
+                 * Else, draw the nose up and change sprite to looking up
+                 */
                 else
                 {
                     drawSprite(lookUp, playerx, playery);
                     drawSprite(nose, playerx + wPlayer / 2.5, playery);
                 }
-
-                // Player has 3 lifes, if it falls down, it loses one life
-                //  and it gets spawned on the lowest platform
+                /**
+                 * Player has 3 lifes, if it falls down, it loses one life
+                 * and it gets spawned on the lowest platform.
+                 */
                 if (playery > Height - hPlayer)
                 {
                     lifes--;
@@ -409,29 +533,33 @@ public:
                         }
                     }
                 }
-                // if player loses all lifes, he lost, and after that he can play again
+                /**
+                 * If player loses all lifes, he lost, and after that it can play again
+                 */
                 if (lifes == 0)
                     play = false;
             }
             if (play == false)
             {
-                // draw playagain screen
+                /**
+                 * Draw play the again screen
+                 */
                 drawSprite(background, 0, 0);
                 drawSprite(topscore, 0, 0);
                 drawSprite(scoreWord, 0, 0);
                 drawSprite(playagain, Width / 3, Height / 2);
-                firstCounter = 0;
-                numberToDigits(score, firstDigit, firstCounter);
+                scoreCounter = 0;
+                numberToDigits(score, firstDigit, scoreCounter);
 
-                for (int i = firstCounter - 1; i >= 0; i--)
+                for (int i = scoreCounter - 1; i >= 0; i--)
                 {
                     drawSprite(digits[firstDigit[i]], Width / 3 - i * 25, 10);
                 }
 
-                secondCounter = 0;
-                numberToDigits(scorepx, secondDigit, secondCounter);
+                heightCounter = 0;
+                numberToDigits(scorepx, secondDigit, heightCounter);
 
-                for (int i = secondCounter - 1; i >= 0; i--)
+                for (int i = heightCounter - 1; i >= 0; i--)
                 {
                     drawSprite(digits[secondDigit[i]], Width - i * 25 - (wDigit + wDigit / 2), 10);
                 }
@@ -445,7 +573,7 @@ public:
         return false;
     }
 
-    virtual void onMouseMove(int x, int y, int xrelative, int yrelative)
+    void onMouseMove(int x, int y, int xrelative, int yrelative) override
     {
         if (x >= Width / 3 && x <= Width / 3 + wButtonAgain && y >= Height / 2 && y <= Height / 2 + hButtonAgain && play == false)
             goodForAgain = true;
@@ -457,8 +585,9 @@ public:
         mousey = y;
     }
 
-    virtual void onMouseButtonClick(FRMouseButton button, bool isReleased)
+    void onMouseButtonClick(FRMouseButton button, bool isReleased) override
     {
+        // Level Start
         if (button == FRMouseButton::LEFT && goodForStartGame == true && started == false)
             started = true;
         // Level Restart
@@ -471,12 +600,12 @@ public:
             enemies.clear();
             springs.clear();
             tmplats.clear();
-            dy = 0;
-            grav = 500;
+            deltaY = 0;
+            gravity = 500;
             score = 0;
             scorepx = 0;
-            int platformCount = 6;
-            float gap = (float)(Height / platformCount);
+            int platformCount = 9;
+            const float gap = (float)(Height / platformCount);
             generatePlatforms(a, gap, Width, Height, wPlatform, hPlatform, coins);
             lifes = 3;
             spring = 1;
@@ -490,7 +619,7 @@ public:
         }
     }
 
-    virtual void onKeyPressed(FRKey k)
+    void onKeyPressed(FRKey k) override
     {
         if (k == FRKey::RIGHT)
         {
@@ -506,7 +635,7 @@ public:
         }
     }
 
-    virtual void onKeyReleased(FRKey k)
+    void onKeyReleased(FRKey k) override
     {
         if (k == FRKey::RIGHT)
             isMovingRight = false;
@@ -514,7 +643,7 @@ public:
             isMovingLeft = false;
     }
 
-    virtual const char *GetTitle() override
+	const char *GetTitle() override
     {
         return "Doodle Jump";
     }

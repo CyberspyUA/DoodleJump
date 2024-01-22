@@ -1,19 +1,19 @@
 #pragma once
-void numberToDigits(int score, int dig[50], int &cnt)
+void numberToDigits(int score, int digits[50], int &counter)
 {
     int aux = score;
     if (aux != 0)
     {
         while (aux)
         {
-            dig[cnt] = aux % 10;
+            digits[counter] = aux % 10;
             aux /= 10;
-            cnt++;
+            counter++;
         }
     }
     else
     {
-        dig[cnt] = 0;
-        cnt++;
+        digits[counter] = 0;
+        counter++;
     }
 }

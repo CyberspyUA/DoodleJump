@@ -2,8 +2,8 @@
 struct Bullet
 {
     float x, y;
-    float dy;
-    float dx;
+    float deltaY;
+    float deltaX;
     bool isActive;
     float mouseX;
 };
