@@ -1,4 +1,5 @@
 #pragma once
+
 /**
  * \brief Level generator
  * \param a - matrix that represents screen, where game object can be placed. 
@@ -80,7 +81,7 @@ inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx
     }
 }
 
-inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score) {
+inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinCounter) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive &&
             playerx + wPlayer > coins[i].x &&
@@ -90,6 +91,7 @@ inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, floa
             // Player collected the coin
             coins[i].isActive = false;
             score += 100;
+            coinCounter++;
         }
     }
 }
@@ -140,16 +142,9 @@ inline void renderCoins(std::vector<Coin>& coins, Sprite* coinSprite, int wPlatf
         if (coins[i].isActive)
         {
             // Check if the coin is on a platform and render accordingly
-            if (coins[i].platformID >= 1 && coins[i].platformID <= 3)
+            if (coins[i].platformID == 1)
             {
-                int platformX = coins[i].x - wPlatform / 2;
-                int platformY = coins[i].y + hPlatform;
-                drawSprite(coinSprite, platformX, platformY);
-                std::cout << "X: " << platformX << "Y: " << platformY << "\n";
-          
-            }
-            else
-            {
+        
                 // Render the coin as usual
                 drawSprite(coinSprite, coins[i].x, coins[i].y);
             }
@@ -167,13 +162,11 @@ inline void RenderEnemies(std::vector<Enemy>&enemies, Sprite* enemy)
 	}
 }
 
-inline void updateCoinPositions(std::vector<Coin>& coins, float dy, float dt)
-{
-    for (int i = 0; i < coins.size(); i++)
-    {
-        if (coins[i].isActive)
-        {
-            coins[i].y -= dy * dt;
-        }
-    }
-}
+//inline void updateCoinPositions(std::vector<Coin>& coins, int a[][], int hCoin)
+//{
+//    /**
+//    * Coins move down with the platform they belong to
+//    */
+//	for (int j = 0; j < coins.size(); j++)
+//		coins[j].y = a[coins[j].platformID][1] - hCoin;
+//}

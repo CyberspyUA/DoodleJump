@@ -116,7 +116,7 @@ private:
     int aux, scoreCounter = 0, heightCounter = 0;
     int wDigit, hDigit;
     int  wButtonAgain, hButtonAgain;
-    static int totalCoinCounter;
+    int coinCounter = 0;
     /**
      * Platform numeric variables
      */
@@ -145,6 +145,7 @@ private:
     std::vector<Coin> coins;
 
 public:
+       
 	/**
 	 * \Preinitializing parameters and settings before running the framework.
 	 * \param width - Window width
@@ -218,6 +219,7 @@ public:
         lastTick = getTickCount();
         lifes = 3;
         springJumpHeight = 1;
+        coinCounter = 0;
         return true;
     }
 
@@ -429,7 +431,7 @@ public:
                             }
                             
                         }
-                        /*updateCoinPositions(coins, deltaY);*/
+
                         /**
                          * Enemy moves down with the platform it belongs to
                          */
@@ -459,9 +461,10 @@ public:
 
                 playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, springJumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
 
-                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score);
-
-                updateCoinPositions(coins, deltaY, deltaTime);
+                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score, coinCounter);
+                std::cout << "Coins claimed: " << coinCounter << "\n";
+                for (int j = 0; j < coins.size(); j++)
+				coins[j].y = a[coins[j].platformID][1] - hCoin;
                 /**
                  * Remove temporary if:
                  *  1) Player jumped on the temporary platform, so it can be deleted.
@@ -616,6 +619,7 @@ public:
             gravity = 500;
             score = 0;
             scorepx = 0;
+            coinCounter = 0;
             int platformCount = 9;
             const float gap = (float)(Height / platformCount);
             generatePlatforms(a, gap, Width, Height, wPlatform);
