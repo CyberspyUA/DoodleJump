@@ -459,7 +459,7 @@ public:
 
                 playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, spring, startSpring);
 
-                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform);
+                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform, wPlatform, hPlatform);
                
 
                 playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer);
