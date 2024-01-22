@@ -82,7 +82,7 @@ private:
 	/**
 	 * Items sprites
 	 */
-	Sprite *jumpspring = nullptr;
+	Sprite *jumpSpring = nullptr;
     Sprite *coin = nullptr;
 	/**
 	 * Player numeric variables
@@ -191,7 +191,7 @@ public:
         //Background
         background = createSprite("data/Background/space-bck@2x.png");
         //Items
-        jumpspring = createSprite("data/Items/springIdle.png");
+        jumpSpring = createSprite("data/Items/springIdle.png");
         coin = createSprite("data/Items/coin.png");
         //Enemy
         enemy = createSprite("data/Enemies/RadarMonster.png");
@@ -205,7 +205,7 @@ public:
         getSpriteSize(enemy, wEnemy, hEnemy);
         getSpriteSize(bulletspr, wBullet, hBullet);
         getSpriteSize(digits[9], wDigit, hDigit);
-        getSpriteSize(jumpspring, wSpring, hSpring);
+        getSpriteSize(jumpSpring, wSpring, hSpring);
         getSpriteSize(playStart, wPlayStart, hPlayStart);
         getSpriteSize(coin, wCoin, hCoin);
         int platformCount = 9;
@@ -274,7 +274,7 @@ public:
                  */
                 for (int i = 0; i < springs.size(); i++)
                 {
-                    drawSprite(jumpspring, springs[i].x, springs[i].y);
+                    drawSprite(jumpSpring, springs[i].x, springs[i].y);
                 }
                 /**
                  * Rendering platforms
@@ -283,7 +283,10 @@ public:
                 {
                     drawSprite(platformTemp, tmplats[i].x, tmplats[i].y);
                 }
-
+                /**
+                 * Rendering coins
+                 */
+                renderCoins(coins, coin);
                 /**
                  * Hitting the platform gameplay mechanic.
                  * Player jumps off a platform, and the score is increased
@@ -400,8 +403,8 @@ public:
                              *
                              */
                             int randPlatTemp = rand() % 999;
-                            // 1% of time a platform will be created
-                            if (randPlatTemp < 50)
+                            // 10% of time a platform will be created
+                            if (randPlatTemp < 100)
                             {
                                 TempPlat newPlatform = {rand() % (Width - wPlatform), a[i][1] + hPlatform + rand() % ((int)gap - 2 * hPlatform), getTickCount()};
                                 tmplats.push_back(newPlatform);
@@ -413,7 +416,7 @@ public:
                                 Enemy newEnemy = {a[i][0] + wPlatform / 2 - wEnemy / 2, a[i][1] - hEnemy, i};
                                 enemies.push_back(newEnemy);
                             }
-                            renderCoins(coins, coin);
+                            
                             if ((getTickCount() - startSpring) / 1000 > 20 && (getTickCount() - stopSpring) / 1000 > 10)
                             {
                                 int randomSpring = rand() % 999;
@@ -456,23 +459,34 @@ public:
 
                 playerInteractWithSpring(springs, playerx, playery, wPlayer, hPlayer, wSpring, hSpring, deltaY, springed, spring, startSpring);
 
-                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform, indTempPlatform);
-
-                if(playerHitTempPlatform)
-                {
-                	tmplats.erase(std::remove_if(tmplats.begin(), tmplats.end(), [](const TempPlat& plat) { return plat.isPlatformUsed; }), tmplats.end());
-                    playerHitTempPlatform = false;
-                }
+                playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, spring, playerHitTempPlatform);
+               
 
                 playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer);
                 /**
-                 * Remove temporary platforms out of the screen
+                 * Remove temporary if:
+                 *  1) Platforms out of the screen;
+                 *  2) Player jumped on the temporary platform, so it can be deleted.
                  */
-                for (int i = 0; i < tmplats.size(); i++)
-                {
-                    if (tmplats[i].y > Height)
-                        tmplats.erase(tmplats.begin() + i);
-                }
+                std::vector<int> indicesToRemove;
+
+				for (int i = 0; i < tmplats.size(); i++)
+				{
+				    if(playerHitTempPlatform && tmplats[i].isPlatformUsed)
+				    {
+				        indicesToRemove.push_back(i);
+				        std::cout << "Platform erased." << std::endl;
+                        playerHitTempPlatform = false;
+				    }
+				    if (tmplats[i].y > Height)
+				        indicesToRemove.push_back(i);
+				}
+
+				// Remove elements marked for removal in reverse order
+				for (int i = indicesToRemove.size() - 1; i >= 0; i--)
+				{
+				    tmplats.erase(tmplats.begin() + indicesToRemove[i]);
+				}
 				/**
 				 * In case: player is out of the screen - he appears on the other side.
 				 */

@@ -105,7 +105,7 @@ void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playe
         }
     }
 }
-void playerInteractWithTempPlat(std::vector<TempPlat>& tmplats, float playerx, float playery, int wPlayer, int hPlayer, float& dy, float spring, bool& didPlayerHitPlatform, int& indHitPlatform)
+void playerInteractWithTempPlat(std::vector<TempPlat>& tmplats, float playerx, float playery, int wPlayer, int hPlayer, float& dy, float spring, bool& didPlayerHitPlatform)
 {
     for (int i = 0; i < tmplats.size(); i++)
     {
@@ -119,7 +119,6 @@ void playerInteractWithTempPlat(std::vector<TempPlat>& tmplats, float playerx, f
             dy = -(800) * spring;
             // Set the temporary platform as used
             tmplats[i].isPlatformUsed = true;
-            indHitPlatform = i;
         }
     }
 }
