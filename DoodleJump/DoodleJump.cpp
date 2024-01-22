@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Framework
  */
 #include "Framework.h"
@@ -70,7 +70,6 @@ private:
     Sprite *digits[10];
     Sprite *topscore = nullptr;
     Sprite *scoreWord = nullptr;
-    Sprite *moneyBag = nullptr; // Icon left to the counter of collected coins.
 	/**
 	 * Bullet sprite
 	 */
@@ -191,7 +190,6 @@ public:
         digits[9] = createSprite("data/ScoreBoard/nine.png");
         topscore = createSprite("data/ScoreBoard/score_board.png");
         scoreWord = createSprite("data/ScoreBoard/score.png");
-        moneyBag = createSprite("data/ScoreBoard/money-bag.png");
         //Projectile
         bulletspr = createSprite("data/Player/meteor.png");
         //Platforms
@@ -253,7 +251,6 @@ public:
                 drawSprite(background, 0, 0);
                 drawSprite(topscore, 0, 0);
                 drawSprite(scoreWord, 0, 0);
-                drawSprite(moneyBag, 300, 0);
 
                 for (int i = 1; i <= 6; i++)
                     drawSprite(block, a[i][0], a[i][1]);
@@ -343,7 +340,7 @@ public:
                 /**
                  * Immune ability for 20 seconds.
                  * It lasts for 20 seconds.
-                 * The player can�t fall (they will jump off the bottom side of the screen).
+                 * The player cant fall (they will jump off the bottom side of the screen).
                  * However, they can still die from enemies.
                  */
                  if (isImmuneToFall == true)
