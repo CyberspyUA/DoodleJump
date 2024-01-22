@@ -259,6 +259,7 @@ public:
                 drawSprite(topscore, 0, 0);
                 drawSprite(scoreWord, 0, 0);
                 drawSprite(moneyBag, 300, 0);
+
                 for (int i = 1; i <= 6; i++)
                     drawSprite(block, a[i][0], a[i][1]);
                 scoreCounter = 0;
@@ -412,11 +413,12 @@ public:
                                 if (enemies[j].platformID == i)
                                     enemies.erase(enemies.begin() + j);
                             /**
-                             * Erase the spring from the paltform that got off the screen.
+                             * Erase the spring from the platform that got off the screen.
                              */
                             for (int j = 0; j < springs.size(); j++)
                                 if (springs[j].platformID == i)
                                     springs.erase(springs.begin() + j);
+                            
 
                             score += 1;
                             a[i][1] = 0;
@@ -489,7 +491,9 @@ public:
                 playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, springJumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
 
                 playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score, coinScore);
-                std::cout << "Coins claimed: " << coinScore << "\n";
+                /**
+                 * Coins move down
+                 */
                 for (int j = 0; j < coins.size(); j++)
 				coins[j].y = a[coins[j].platformID][1] - hCoin;
                 /**
@@ -581,7 +585,6 @@ public:
                  */
                 if (lifes == 0)
                     play = false;
-                std::cout << "Lifes: " << lifes << "\n";
             }
             if (play == false)
             {

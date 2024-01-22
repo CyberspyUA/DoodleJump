@@ -25,11 +25,6 @@ inline void generatePlatforms(int a[][2], float gap, int Width, int Height, int 
 
 /**
  * \brief Destroying the enemy when bullet hit the enemy
- * \param bullets 
- * \param enemies 
- * \param wEnemy - enemy width
- * \param hEnemy - enemy height
- * \param wBullet - bullet width
  */
 inline void bulletDestroysEnemy(std::vector<Bullet> &bullets, std::vector<Enemy> &enemies, int wEnemy, int hEnemy, int wBullet)
 {
@@ -64,11 +59,11 @@ inline void playerInteractWithEnemy(std::vector<Enemy> &enemies, float playerx, 
     }
 }
 
-inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx, float playery, int wPlayer, int hPlayer, int wEnemy, int hEnemy, float dy, bool &springed, float &spring, float &startSpring)
+inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx, float playery, int wPlayer, int hPlayer, int wSpring, int hSpring, float dy, bool &springed, float &spring, float &startSpring)
 {
     for (int i = 0; i < springs.size(); i++)
     {
-        if (floor(playerx) >= springs[i].x - wPlayer && floor(playerx) <= springs[i].x + wEnemy)
+        if (floor(playerx) >= springs[i].x - wPlayer && floor(playerx) <= springs[i].x + wSpring)
         {
             if ((floor(playery + hPlayer) == springs[i].y + 3 || floor(playery + hPlayer) == springs[i].y + 1 || floor(playery + hPlayer) == springs[i].y + 2 || floor(playery + hPlayer) == springs[i].y + 5 || floor(playery + hPlayer) == springs[i].y + 4 || floor(playery + hPlayer) == springs[i].y + 6) && dy > 0)
             {
@@ -84,10 +79,10 @@ inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx
 inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinScore) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive &&
-            playerx + wPlayer >= coins[i].x &&
-            playerx <= coins[i].x &&
-            playery + hPlayer >= coins[i].y &&
-            playery <= coins[i].y) {
+            playerx + wPlayer > coins[i].x &&
+            playerx < coins[i].x &&
+            playery + hPlayer > coins[i].y &&
+            playery < coins[i].y) {
             // Player collected the coin
             coins[i].isActive = false;
             score += 100;
@@ -101,7 +96,7 @@ inline void playerInteractWithTempPlat(std::vector<TempPlat>& tmplats, float pla
 {
     for (int i = 0; i < tmplats.size(); i++)
     {
-        if (tmplats[i].isPlatformUsed &&
+        if (tmplats[i].isPlatformUsed  &&
 	    playerx + wPlayer > tmplats[i].x &&
 	    playerx < tmplats[i].x + wPlatform &&
 	    playery + hPlayer > tmplats[i].y &&
