@@ -81,7 +81,7 @@ inline void playerInteractWithSpring(std::vector<Spring> &springs, float playerx
     }
 }
 
-inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinCounter) {
+inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, float playery, int wPlayer, int hPlayer, int score, int& coinScore) {
     for (int i = 0; i < coins.size(); i++) {
         if (coins[i].isActive &&
             playerx + wPlayer > coins[i].x &&
@@ -91,7 +91,7 @@ inline void playerInteractWithCoin(std::vector<Coin>& coins, float playerx, floa
             // Player collected the coin
             coins[i].isActive = false;
             score += 100;
-            coinCounter++;
+            coinScore++;
         }
     }
 }
@@ -161,12 +161,3 @@ inline void RenderEnemies(std::vector<Enemy>&enemies, Sprite* enemy)
 		drawSprite(enemy, enemies[i].x, enemies[i].y);
 	}
 }
-
-//inline void updateCoinPositions(std::vector<Coin>& coins, int a[][], int hCoin)
-//{
-//    /**
-//    * Coins move down with the platform they belong to
-//    */
-//	for (int j = 0; j < coins.size(); j++)
-//		coins[j].y = a[coins[j].platformID][1] - hCoin;
-//}

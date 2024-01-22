@@ -71,6 +71,7 @@ private:
     Sprite *digits[10];
     Sprite *topscore = nullptr;
     Sprite *scoreWord = nullptr;
+    Sprite *moneyBag = nullptr; // Icon left to the counter of collected coins.
 	/**
 	 * Bullet sprite
 	 */
@@ -103,6 +104,8 @@ private:
 	float springJumpHeight;
     float startSpring;
     float stopSpring;
+    float startImmune;
+    float stopImmune;
     int a[8][2];
 
 	/**
@@ -112,10 +115,14 @@ private:
     int Width, Height; // Screen Width and Height
     int score = 0;
     int scorepx = 0;
-    int firstDigit[20], secondDigit[20];
-    int aux, scoreCounter = 0, heightCounter = 0;
+    int heightDigits[20], scoreDigits[20], coinDigits[10];
+    int aux;
+    int heightCounter = 0;
+    int scoreCounter = 0;
     int wDigit, hDigit;
-    int  wButtonAgain, hButtonAgain;
+    int wButtonAgain;
+    int hButtonAgain;
+    int coinScore = 0;
     int coinCounter = 0;
     /**
      * Platform numeric variables
@@ -187,6 +194,7 @@ public:
         digits[9] = createSprite("data/ScoreBoard/nine.png");
         topscore = createSprite("data/ScoreBoard/score_board.png");
         scoreWord = createSprite("data/ScoreBoard/score.png");
+        moneyBag = createSprite("data/ScoreBoard/money-bag.png");
         //Projectile
         bulletspr = createSprite("data/Player/meteor.png");
         //Platforms
@@ -219,7 +227,6 @@ public:
         lastTick = getTickCount();
         lifes = 3;
         springJumpHeight = 1;
-        coinCounter = 0;
         return true;
     }
 
@@ -251,23 +258,23 @@ public:
                 drawSprite(background, 0, 0);
                 drawSprite(topscore, 0, 0);
                 drawSprite(scoreWord, 0, 0);
+                drawSprite(moneyBag, 300, 0);
                 for (int i = 1; i <= 6; i++)
                     drawSprite(block, a[i][0], a[i][1]);
-
                 scoreCounter = 0;
-                numberToDigits(score, firstDigit, scoreCounter);
+                numberToDigits(score, heightDigits, scoreCounter);
 
                 for (int i = scoreCounter - 1; i >= 0; i--)
                 {
-                    drawSprite(digits[firstDigit[i]], Width / 5 - i * 25, 7);
+                    drawSprite(digits[heightDigits[i]], Width / 5 - i * 25, 7);
                 }
 
                 heightCounter = 0;
-                numberToDigits(scorepx, secondDigit, heightCounter);
+                numberToDigits(scorepx, scoreDigits, heightCounter);
 
                 for (int i = heightCounter - 1; i >= 0; i--)
                 {
-                    drawSprite(digits[secondDigit[i]], Width - i * 25 - (wDigit + wDigit / 2), 7);
+                    drawSprite(digits[scoreDigits[i]], Width - i * 25 - (wDigit + wDigit / 2), 7);
                 }
                 RenderEnemies(enemies, enemy);
                 /**
@@ -358,7 +365,30 @@ public:
                         stopSpring = getTickCount();
                     }
                 }
-
+                /**
+                 * Immune ability for 20 seconds.
+                 * It lasts for 20 seconds.
+                 * The player can’t fall (they will jump off the bottom side of the screen).
+                 * However, they can still die from enemies.
+                 */
+                 if (isImmuneToFall == true)
+                 {
+                    if ((getTickCount() - startImmune) / 1000 > 20)
+                    {
+                        
+                        stopImmune = getTickCount();
+                    }
+                    else
+                    {
+	                    destroySprite(lookLeft);
+			            destroySprite(lookRight);
+			            destroySprite(lookUp);
+                        lookRight = createSprite("data/Player/space-right.png");
+						lookLeft = createSprite("data/Player/space-left.png");
+						lookUp = createSprite("data/Player/space-puca.png");
+                        isImmuneToFall = false;
+                    }
+                 }
                 /**
                  * Game view adjust method.
                  * Keep the player at max the center of the screen
@@ -419,7 +449,7 @@ public:
                                 enemies.push_back(newEnemy);
                             }
                             
-                            if ((getTickCount() - startSpring) / 1000 > 20 && (getTickCount() - stopSpring) / 1000 > 10)
+                            if ((getTickCount() - startSpring) / 1000 > 1 && (getTickCount() - stopSpring) / 1000 > 1)
                             {
                                 int randomSpring = rand() % 999;
                                 // 1% of time spring will be created
@@ -461,8 +491,8 @@ public:
 
                 playerInteractWithTempPlat(tmplats, playerx, playery, wPlayer, hPlayer, deltaY, springJumpHeight, playerHitTempPlatform, wPlatform, hPlatform);
 
-                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score, coinCounter);
-                std::cout << "Coins claimed: " << coinCounter << "\n";
+                playerInteractWithCoin(coins, playerx, playery, wPlayer, hPlayer, score, coinScore);
+                std::cout << "Coins claimed: " << coinScore << "\n";
                 for (int j = 0; j < coins.size(); j++)
 				coins[j].y = a[coins[j].platformID][1] - hCoin;
                 /**
@@ -538,7 +568,8 @@ public:
                  */
                 if (playery > Height - hPlayer)
                 {
-                    lifes--;
+                    if(isImmuneToFall == false)
+						lifes--;
                     for (int i = 1; i <= 6; i++)
                     {
                         if (a[i][1] < Height && a[i][1] > Height - (Height / 4))
@@ -553,6 +584,7 @@ public:
                  */
                 if (lifes == 0)
                     play = false;
+                std::cout << "Lifes: " << lifes << "\n";
             }
             if (play == false)
             {
@@ -564,19 +596,19 @@ public:
                 drawSprite(scoreWord, 0, 0);
                 drawSprite(playagain, Width / 3, Height / 2);
                 scoreCounter = 0;
-                numberToDigits(score, firstDigit, scoreCounter);
+                numberToDigits(score, heightDigits, scoreCounter);
 
                 for (int i = scoreCounter - 1; i >= 0; i--)
                 {
-                    drawSprite(digits[firstDigit[i]], Width / 3 - i * 25, 10);
+                    drawSprite(digits[heightDigits[i]], Width / 3 - i * 25, 10);
                 }
 
                 heightCounter = 0;
-                numberToDigits(scorepx, secondDigit, heightCounter);
+                numberToDigits(scorepx, scoreDigits, heightCounter);
 
                 for (int i = heightCounter - 1; i >= 0; i--)
                 {
-                    drawSprite(digits[secondDigit[i]], Width - i * 25 - (wDigit + wDigit / 2), 10);
+                    drawSprite(digits[scoreDigits[i]], Width - i * 25 - (wDigit + wDigit / 2), 10);
                 }
             }
         }
@@ -619,19 +651,40 @@ public:
             gravity = 500;
             score = 0;
             scorepx = 0;
-            coinCounter = 0;
+            coinScore = 0;
             int platformCount = 9;
             const float gap = (float)(Height / platformCount);
             generatePlatforms(a, gap, Width, Height, wPlatform);
             lifes = 3;
             springJumpHeight = 1;
             springed = false;
+            /**
+             *Restart immune ability
+             */
+            isImmuneToFall = false;
+        	destroySprite(lookLeft);
+            destroySprite(lookRight);
+            destroySprite(lookUp);
+            lookLeft = createSprite("data/Player/space-left.png");
+            lookRight = createSprite("data/Player/space-right.png");
+            lookUp = createSprite("data/Player/space-puca.png");
         }
         // Shoot projectile
         if (button == FRMouseButton::LEFT && isReleased == true)
         {
             Bullet newBullet = {playerx, playery, -700, -700, true, mousex};
             bullets.push_back(newBullet);
+        }
+        if(button == FRMouseButton::RIGHT && coinScore >= 20)
+        {
+            destroySprite(lookLeft);
+            destroySprite(lookRight);
+            destroySprite(lookUp);
+            lookLeft = createSprite("data/Player/shield-space-left.png");
+            lookRight = createSprite("data/Player/shield-space-right.png");
+            lookUp = createSprite("data/Player/shield-space-puca.png");
+            coinScore-= 20;
+	        isImmuneToFall = true;
         }
     }
 
